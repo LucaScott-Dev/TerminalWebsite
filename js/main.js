@@ -5,6 +5,13 @@ const cmdline = document.getElementById("cmdline");
 const PROMPT = "visitor@luca:~$";
 
 // =======================================
+// HELPER: pad strings for aligned columns
+// =======================================
+function pad(str, length) {
+    return str + " ".repeat(Math.max(0, length - str.length));
+}
+
+// =======================================
 // TYPING ANIMATION
 // =======================================
 function typeText(text, cls = "line", speed = 20, target = output) {
@@ -23,7 +30,7 @@ function typeText(text, cls = "line", speed = 20, target = output) {
             let idx = 0;
 
             function typeChar() {
-                el.textContent = segment.substring(0, idx);
+                el.innerHTML = segment.substring(0, idx);
                 idx++;
 
                 if (idx <= segment.length) {
@@ -53,7 +60,6 @@ const ASCII_BANNER = `
 ██║     ██║   ██║██║     ██╔══██║╚════██║       ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║██║██║╚██╗██║██╔══██║██║     
 ███████╗╚██████╔╝╚██████╗██║  ██║███████║       ██║   ███████╗██║  ██║██║ ╚═╝ ██║██║██║ ╚████║██║  ██║███████╗
 ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝       ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝
-                                                                                                                                                                    
 `;
 
 // =======================================
@@ -61,22 +67,42 @@ const ASCII_BANNER = `
 // =======================================
 
 const commands = {
-    help: () =>
-`Available commands:
+    help: () => {
+        const entries = [
+            ["help",     "Show this help menu"],
+            ["clear",    "Clear the terminal"],
+            ["about",    "Who the hell is Luca?"],
+            ["socials",  "Where to find me"],
+            ["projects", "What I'm working on"]
+        ];
 
-  help          Show this help menu
-
-  clear         Clear the terminal
-
-  about         Who the hell is Luca?
-
-  socials       Where to find me
-
-  projects      What I'm working on
-`,
+        return (
+            "Available commands:\n\n" +
+            entries
+                .map(([cmd, desc]) =>
+                    `  <span class="cmd">${pad(cmd, 12)}</span> ${desc}`
+                )
+                .join("\n\n")
+        );
+    },
 
     about: () => "Not finished yet",
-    socials: () => "Not finished yet",
+    socials: () => {
+        const entries = [
+            ["GitHub:",     "https://github.com/LucaScott-Dev"],
+            ["Instagram:",  "https://www.instagram.com/lucascott05/"],
+            ["Linkedin:",    "https://www.linkedin.com/in/luca-scott-13a362397/"]
+        ];
+
+        return (
+            "Social Links:\n\n" +
+            entries
+                .map(([name, url]) =>
+                    `  <span class="cmd">${pad(name, 12)}</span> <a class="link" href="${url}" target="_blank">${url}</a>`
+                )
+                .join("\n\n")
+        );
+    },
     projects: () => "Not finished yet",
 
     clear: () => {
@@ -100,7 +126,7 @@ function printLine(text = "", cls = "line", target = output) {
             seg.textContent = "\u00A0";
         } else {
             seg.className = cls;
-            seg.textContent = segment;
+            seg.innerHTML = segment;
         }
 
         target.appendChild(seg);
@@ -116,7 +142,6 @@ function printLine(text = "", cls = "line", target = output) {
 async function runCommand(input) {
     const trimmed = input.trim();
 
-    // Print command instantly
     printLine(`${PROMPT} ${trimmed}`, "line command");
     printLine("");
 
@@ -142,10 +167,6 @@ function focusInput() {
     cmdline.focus();
 }
 
-// =======================================
-// EVENT LISTENERS
-// =======================================
-
 cmdline.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
         runCommand(cmdline.value);
@@ -169,10 +190,7 @@ window.addEventListener("focus", focusInput);
 window.addEventListener("load", async () => {
     focusInput();
 
-    // Type ASCII banner (with preserved spacing)
     await typeText(ASCII_BANNER, "ascii", 3, boot);
-
-    // Small spacer
     await typeText("", "boot-spacer", 0, boot);
 
     await typeText("Welcome to Luca's Terminal", "line accent", 18, boot);
@@ -180,4 +198,3 @@ window.addEventListener("load", async () => {
 
     await typeText("", "boot-spacer", 0, boot);
 });
-
