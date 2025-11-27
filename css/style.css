@@ -1,0 +1,100 @@
+/* Global Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --fg: #e5e5e5;
+    --accent: #00ff7f;
+    --muted: #777;
+    --prompt: #00ff7f;
+    --font: "Fira Code", "SF Mono", Menlo, Monaco, Consolas, monospace;
+}
+
+body {
+    background: radial-gradient(circle at 25% 20%, #0b0f18 0%, #06080d 40%, #000 100%);
+    color: var(--fg);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.4;
+    overflow-x: hidden;
+    padding-top: 30px;
+    padding-left: 30px;
+}
+
+/* TERMINAL WRAPPER */
+#terminal {
+    padding-left: 10px; /* pushes ALL text to the left side */
+    max-width: 720px;
+}
+
+/* OUTPUT SECTION */
+#output {
+    margin-bottom: 28px; /* pushes prompt lower on screen */
+}
+
+.line {
+    margin-bottom: 2px;
+    white-space: auto;
+}
+
+.line.blank {
+    line-height: 6px;
+    margin-bottom: 2px;
+}
+
+.line.error { color: #ff5555; }
+.line.muted { color: var(--muted); }
+.accent { color: var(--accent); }
+
+/* PROMPT + INPUT */
+#input-line {
+    display: flex;
+    align-items: center; /* CORRECT spelling */
+    gap: 8px;
+    padding-top: 12px;
+}
+
+.prompt {
+    color: var(--prompt);
+}
+
+#cmdline {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--fg);
+    font-family: inherit;
+    font-size: inherit;
+    caret-color: var(--accent);
+}
+
+#output::-webkit-scrollbar {
+    width: 6px;
+}
+#output::-webkit-scrollbar-thumb {
+    background: #333;
+}
+
+.line.command {
+    color: var(--accent);
+}
+
+.line.help-item {
+    margin-bottom: 10px;
+}
+
+body, #terminal {
+    user-select: none;
+}
+
+#boot {
+    margin-bottom: 4px;
+}
+
+#boot .line {
+    margin-bottom: 2px;
+}
