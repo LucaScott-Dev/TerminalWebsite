@@ -1,4 +1,4 @@
-/* Global Reset */
+/* Reset */
 * {
     margin: 0;
     padding: 0;
@@ -7,9 +7,9 @@
 
 :root {
     --fg: #e5e5e5;
-    --accent: #00ff7f;
+    --accent: #5EDAFD;
     --muted: #777;
-    --prompt: #00ff7f;
+    --prompt: #5EDAFD;
     --font: "Fira Code", "SF Mono", Menlo, Monaco, Consolas, monospace;
 }
 
@@ -17,42 +17,47 @@ body {
     background: radial-gradient(circle at 25% 20%, #0b0f18 0%, #06080d 40%, #000 100%);
     color: var(--fg);
     font-family: var(--font);
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1.4;
+    padding-top: 40px;
     overflow-x: hidden;
-    padding-top: 30px;
-    padding-left: 30px;
 }
 
-/* TERMINAL WRAPPER */
+/* Terminal container */
 #terminal {
-    padding-left: 10px; /* pushes ALL text to the left side */
-    max-width: 720px;
+    max-width: none;
+    width: 100%;
+    padding-left: 20px;
 }
 
-/* OUTPUT SECTION */
-#output {
-    margin-bottom: 28px; /* pushes prompt lower on screen */
-}
-
+/* Lines */
 .line {
-    margin-bottom: 2px;
-    white-space: auto;
+    margin-bottom: 1px; /* tight */
 }
 
 .line.blank {
-    line-height: 6px;
-    margin-bottom: 2px;
+    line-height: 3px;
+    margin-bottom: 1px;
 }
 
-.line.error { color: #ff5555; }
-.line.muted { color: var(--muted); }
-.accent { color: var(--accent); }
+.line.command {
+    color: var(--accent);
+}
 
-/* PROMPT + INPUT */
+.line.error {
+    color: #ff5555;
+}
+
+/* Boot spacer (controls spacing between welcome text & prompt) */
+.boot-spacer {
+    height: 24px;       /* adjust this value if you want more/less space */
+    margin-bottom: 10px;
+}
+
+/* Prompt */
 #input-line {
     display: flex;
-    align-items: center; /* CORRECT spelling */
+    align-items: center;
     gap: 8px;
     padding-top: 12px;
 }
@@ -72,29 +77,18 @@ body {
     caret-color: var(--accent);
 }
 
-#output::-webkit-scrollbar {
-    width: 6px;
-}
-#output::-webkit-scrollbar-thumb {
-    background: #333;
-}
-
-.line.command {
+.ascii {
+    white-space: pre;
+    font-size: 15px;
+    line-height: 1.5;
+    overflow-x: visible;
     color: var(--accent);
-}
 
-.line.help-item {
-    margin-bottom: 10px;
+    text-shadow:
+        0 0 9px #AEC6CF,
+        0 0 10px #AEC6CF;
 }
 
 body, #terminal {
     user-select: none;
-}
-
-#boot {
-    margin-bottom: 4px;
-}
-
-#boot .line {
-    margin-bottom: 2px;
 }

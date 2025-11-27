@@ -1,11 +1,64 @@
 const output = document.getElementById("output");
+const boot = document.getElementById("boot");
 const cmdline = document.getElementById("cmdline");
 
 const PROMPT = "visitor@luca:~$";
 
-// ==========================
+// =======================================
+// TYPING ANIMATION
+// =======================================
+function typeText(text, cls = "line", speed = 20, target = output) {
+    return new Promise(resolve => {
+        const lines = text.split("\n");
+        let i = 0;
+
+        function typeNextLine() {
+            if (i >= lines.length) return resolve();
+
+            const segment = lines[i];
+            const el = document.createElement("div");
+            el.className = cls;
+            target.appendChild(el);
+
+            let idx = 0;
+
+            function typeChar() {
+                el.textContent = segment.substring(0, idx);
+                idx++;
+
+                if (idx <= segment.length) {
+                    setTimeout(typeChar, speed);
+                } else {
+                    if (segment.trim() === "") el.classList.add("blank");
+                    i++;
+                    setTimeout(typeNextLine, speed);
+                }
+            }
+
+            typeChar();
+        }
+
+        typeNextLine();
+    });
+}
+
+// =======================================
+// ASCII BANNER
+// =======================================
+
+const ASCII_BANNER = `
+██╗     ██╗   ██╗ ██████╗ █████╗ ███████╗    ████████╗███████╗██████╗ ███╗   ███╗██╗███╗   ██╗ █████╗ ██╗     
+██║     ██║   ██║██╔════╝██╔══██╗██╔════╝    ╚══██╔══╝██╔════╝██╔══██╗████╗ ████║██║████╗  ██║██╔══██╗██║     
+██║     ██║   ██║██║     ███████║███████╗       ██║   █████╗  ██████╔╝██╔████╔██║██║██╔██╗ ██║███████║██║     
+██║     ██║   ██║██║     ██╔══██║╚════██║       ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║██║██║╚██╗██║██╔══██║██║     
+███████╗╚██████╔╝╚██████╗██║  ██║███████║       ██║   ███████╗██║  ██║██║ ╚═╝ ██║██║██║ ╚████║██║  ██║███████╗
+╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝       ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝
+                                                                                                                                                                    
+`;
+
+// =======================================
 // COMMANDS
-// ==========================
+// =======================================
 
 const commands = {
     help: () =>
@@ -32,11 +85,11 @@ const commands = {
     }
 };
 
-// ==========================
-// TERMINAL CORE FUNCTIONS
-// ==========================
+// =======================================
+// PRINT LINE
+// =======================================
 
-function printLine(text = "", cls = "line") {
+function printLine(text = "", cls = "line", target = output) {
     const lines = String(text).split("\n");
 
     lines.forEach(segment => {
@@ -44,29 +97,27 @@ function printLine(text = "", cls = "line") {
 
         if (segment === "") {
             seg.className = `${cls} blank`;
-            seg.textContent = "\u00A0"; // needed to give line height
+            seg.textContent = "\u00A0";
         } else {
             seg.className = cls;
             seg.textContent = segment;
         }
 
-        output.appendChild(seg);
+        target.appendChild(seg);
     });
 
     output.scrollTop = output.scrollHeight;
 }
 
-// ==========================
+// =======================================
 // EXECUTE COMMAND
-// ==========================
+// =======================================
 
-function runCommand(input) {
+async function runCommand(input) {
     const trimmed = input.trim();
 
-    // Show previous command
+    // Print command instantly
     printLine(`${PROMPT} ${trimmed}`, "line command");
-
-    // Tight blank line after
     printLine("");
 
     if (!trimmed) return;
@@ -75,23 +126,25 @@ function runCommand(input) {
 
     if (commands[cmd]) {
         const result = commands[cmd](args);
-        if (result) printLine(result);
+        if (result) {
+            await typeText(result, "line", 12);
+        }
     } else {
-        printLine(`Unknown command: ${cmd}`, "line error");
+        await typeText(`Unknown command: ${cmd}`, "line error", 12);
     }
 }
 
-// ==========================
-// FOCUS HANDLING
-// ==========================
+// =======================================
+// FOCUS MANAGEMENT
+// =======================================
 
 function focusInput() {
     cmdline.focus();
 }
 
-// ==========================
+// =======================================
 // EVENT LISTENERS
-// ==========================
+// =======================================
 
 cmdline.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
@@ -107,5 +160,24 @@ cmdline.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("click", focusInput);
-window.addEventListener("load", focusInput);
 window.addEventListener("focus", focusInput);
+
+// =======================================
+// BOOT SEQUENCE WITH ASCII BANNER + SPACER
+// =======================================
+
+window.addEventListener("load", async () => {
+    focusInput();
+
+    // Type ASCII banner (with preserved spacing)
+    await typeText(ASCII_BANNER, "ascii", 3, boot);
+
+    // Small spacer
+    await typeText("", "boot-spacer", 0, boot);
+
+    await typeText("Welcome to Luca's Terminal", "line accent", 18, boot);
+    await typeText("Type help for a list of commands", "line", 18, boot);
+
+    await typeText("", "boot-spacer", 0, boot);
+});
+
