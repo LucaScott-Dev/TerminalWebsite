@@ -1,25 +1,30 @@
+/* ============================================================
+   DOM REFERENCES
+============================================================ */
 const output = document.getElementById("output");
 const boot = document.getElementById("boot");
 const cmdline = document.getElementById("cmdline");
 
 const PROMPT = "visitor@luca:~$";
+let awaitingMatrixAnswer = false;
 
-// =======================================
-// HELPER: pad strings for aligned columns
-// =======================================
-function pad(str, length) {
-    return str + " ".repeat(Math.max(0, length - str.length));
-}
+/* ============================================================
+   HELPERS
+============================================================ */
 
-// =======================================
-// TYPING ANIMATION
-// =======================================
+// pad for aligned formatting
+const pad = (str, len) => str + " ".repeat(Math.max(0, len - str.length));
+
+
+/* ============================================================
+   TYPING ANIMATION
+============================================================ */
 function typeText(text, cls = "line", speed = 20, target = output) {
     return new Promise(resolve => {
         const lines = text.split("\n");
         let i = 0;
 
-        function typeNextLine() {
+        function nextLine() {
             if (i >= lines.length) return resolve();
 
             const segment = lines[i];
@@ -36,23 +41,70 @@ function typeText(text, cls = "line", speed = 20, target = output) {
                 if (idx <= segment.length) {
                     setTimeout(typeChar, speed);
                 } else {
-                    if (segment.trim() === "") el.classList.add("blank");
+                    if (!segment.trim()) el.classList.add("blank");
                     i++;
-                    setTimeout(typeNextLine, speed);
+                    setTimeout(nextLine, speed);
                 }
             }
 
             typeChar();
         }
 
-        typeNextLine();
+        nextLine();
     });
 }
 
-// =======================================
-// ASCII BANNER
-// =======================================
 
+/* ============================================================
+   MATRIX RAIN (ACCENT COLOR)
+============================================================ */
+function runMatrixRain(duration = 4000) {
+    const canvas = document.getElementById("matrix-canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("");
+    const fontSize = 14;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+
+    let running = true;
+
+    function draw() {
+        if (!running) return;
+        requestAnimationFrame(draw);
+
+        ctx.fillStyle = "rgba(0,0,0,0.07)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // accent blue
+        ctx.fillStyle = "#5EDAFD";
+        ctx.font = fontSize + "px monospace";
+
+        drops.forEach((y, i) => {
+            const char = chars[Math.floor(Math.random() * chars.length)];
+            ctx.fillText(char, i * fontSize, y * fontSize);
+
+            if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+
+            drops[i]++;
+        });
+    }
+
+    draw();
+
+    setTimeout(() => {
+        running = false;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }, duration);
+}
+
+
+/* ============================================================
+   ASCII BANNER
+============================================================ */
 const ASCII_BANNER = `
 ██╗     ██╗   ██╗ ██████╗ █████╗ ███████╗    ████████╗███████╗██████╗ ███╗   ███╗██╗███╗   ██╗ █████╗ ██╗     
 ██║     ██║   ██║██╔════╝██╔══██╗██╔════╝    ╚══██╔══╝██╔════╝██╔══██╗████╗ ████║██║████╗  ██║██╔══██╗██║     
@@ -62,23 +114,25 @@ const ASCII_BANNER = `
 ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝       ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝
 `;
 
-// =======================================
-// COMMANDS
-// =======================================
 
+/* ============================================================
+   COMMANDS
+============================================================ */
 const commands = {
+
     help: () => {
-        const entries = [
+        const items = [
             ["help",     "Show this help menu"],
             ["clear",    "Clear the terminal"],
             ["about",    "Who the hell is Luca?"],
             ["socials",  "Where to find me"],
-            ["projects", "What I'm working on"]
+            ["projects", "What I'm working on"],
+            ["matrix",   "Choose your fate"]
         ];
 
         return (
             "Available commands:\n\n" +
-            entries
+            items
                 .map(([cmd, desc]) =>
                     `  <span class="cmd">${pad(cmd, 12)}</span> ${desc}`
                 )
@@ -87,23 +141,39 @@ const commands = {
     },
 
     about: () => "Not finished yet",
+
     socials: () => {
-        const entries = [
-            ["GitHub:",     "https://github.com/LucaScott-Dev"],
-            ["Instagram:",  "https://www.instagram.com/lucascott05/"],
-            ["Linkedin:",    "https://www.linkedin.com/in/luca-scott-13a362397/"]
+        const items = [
+            ["GitHub:",    "https://github.com/LucaScott-Dev"],
+            ["Instagram:", "https://www.instagram.com/lucascott05/"],
+            ["LinkedIn:",  "https://www.linkedin.com/in/luca-scott-13a362397/"]
         ];
 
         return (
             "Social Links:\n\n" +
-            entries
+            items
                 .map(([name, url]) =>
                     `  <span class="cmd">${pad(name, 12)}</span> <a class="link" href="${url}" target="_blank">${url}</a>`
                 )
                 .join("\n\n")
         );
     },
+
     projects: () => "Not finished yet",
+
+    matrix: () => {
+        awaitingMatrixAnswer = true;
+
+        return `
+You take the <span class="cmd">blue pill</span> — the story ends.
+You wake up in your bed and believe whatever you want to believe.
+
+You take the <span class="cmd">red pill</span> — you stay in Wonderland,
+and I show you how deep the rabbit hole goes.
+
+Type: <span class="cmd">red</span> or <span class="cmd">blue</span>
+`;
+    },
 
     clear: () => {
         output.innerHTML = "";
@@ -111,34 +181,27 @@ const commands = {
     }
 };
 
-// =======================================
-// PRINT LINE
-// =======================================
 
+/* ============================================================
+   PRINT LINE
+============================================================ */
 function printLine(text = "", cls = "line", target = output) {
-    const lines = String(text).split("\n");
+    const lines = text.split("\n");
 
-    lines.forEach(segment => {
-        const seg = document.createElement("div");
+    for (const seg of lines) {
+        const el = document.createElement("div");
+        el.className = seg === "" ? `${cls} blank` : cls;
+        el.innerHTML = seg || "&nbsp;";
+        target.appendChild(el);
+    }
 
-        if (segment === "") {
-            seg.className = `${cls} blank`;
-            seg.textContent = "\u00A0";
-        } else {
-            seg.className = cls;
-            seg.innerHTML = segment;
-        }
-
-        target.appendChild(seg);
-    });
-
-    output.scrollTop = output.scrollHeight;
+    target.scrollTop = target.scrollHeight;
 }
 
-// =======================================
-// EXECUTE COMMAND
-// =======================================
 
+/* ============================================================
+   COMMAND EXECUTION
+============================================================ */
 async function runCommand(input) {
     const trimmed = input.trim();
 
@@ -147,33 +210,52 @@ async function runCommand(input) {
 
     if (!trimmed) return;
 
+    // MATRIX ANSWER MODE
+    if (awaitingMatrixAnswer) {
+        const answer = trimmed.toLowerCase();
+
+        if (answer === "red") {
+            printLine("Welcome to Wonderland…", "line accent");
+            runMatrixRain();
+
+        } else if (answer === "blue") {
+            output.innerHTML = "";
+            boot.innerHTML = "";
+            printLine("The story ends. Everything resets…", "line");
+            setTimeout(() => location.reload(), 1200);
+
+        } else {
+            printLine("That’s not a choice, Neo.", "line error");
+        }
+
+        awaitingMatrixAnswer = false;
+        return;
+    }
+
+    // NORMAL COMMANDS
     const [cmd, ...args] = trimmed.split(" ");
 
     if (commands[cmd]) {
         const result = commands[cmd](args);
-        if (result) {
-            await typeText(result, "line", 12);
-        }
+        if (result) await typeText(result, "line", 12);
     } else {
         await typeText(`Unknown command: ${cmd}`, "line error", 12);
     }
 }
 
-// =======================================
-// FOCUS MANAGEMENT
-// =======================================
 
-function focusInput() {
-    cmdline.focus();
-}
+/* ============================================================
+   INPUT FOCUS
+============================================================ */
+const focusInput = () => cmdline.focus();
 
-cmdline.addEventListener("keydown", (e) => {
+cmdline.addEventListener("keydown", e => {
     if (e.key === "Enter") {
         runCommand(cmdline.value);
         cmdline.value = "";
     }
 
-    if (e.key === "c" && e.ctrlKey) {
+    if (e.ctrlKey && e.key === "c") {
         printLine(`${PROMPT} ${cmdline.value}`, "line command");
         printLine("");
         cmdline.value = "";
@@ -183,10 +265,10 @@ cmdline.addEventListener("keydown", (e) => {
 document.addEventListener("click", focusInput);
 window.addEventListener("focus", focusInput);
 
-// =======================================
-// BOOT SEQUENCE WITH ASCII BANNER + SPACER
-// =======================================
 
+/* ============================================================
+   BOOT SEQUENCE
+============================================================ */
 window.addEventListener("load", async () => {
     focusInput();
 

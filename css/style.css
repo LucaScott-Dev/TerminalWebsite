@@ -1,4 +1,6 @@
-/* Reset */
+/* ===========================
+   GLOBAL RESET + VARIABLES
+=========================== */
 * {
     margin: 0;
     padding: 0;
@@ -13,6 +15,9 @@
     --font: "Fira Code", "SF Mono", Menlo, Monaco, Consolas, monospace;
 }
 
+/* ===========================
+   BASE PAGE STYLES
+=========================== */
 body {
     background: radial-gradient(circle at 25% 20%, #0b0f18 0%, #06080d 40%, #000 100%);
     color: var(--fg);
@@ -21,24 +26,28 @@ body {
     line-height: 1.4;
     padding-top: 40px;
     overflow-x: hidden;
+    user-select: none;
 }
 
-/* Terminal container */
+/* ===========================
+   TERMINAL CONTAINER
+=========================== */
 #terminal {
-    max-width: none;
     width: 100%;
     padding-left: 20px;
+    user-select: none;
 }
 
-/* Lines */
+/* ===========================
+   TERMINAL OUTPUT LINES
+=========================== */
 .line {
-    margin-bottom: 1px; /* tight */
-    white-space: pre;
+    white-space: pre;  /* keeps spacing aligned */
+    margin-bottom: 1px;
 }
 
 .line.blank {
-    line-height: 3px;
-    margin-bottom: 1px;
+    line-height: 4px;
 }
 
 .line.command {
@@ -49,13 +58,15 @@ body {
     color: #ff5555;
 }
 
-/* Boot spacer (controls spacing between welcome text & prompt) */
+/* Very small controlled spacer used between boot text & prompt */
 .boot-spacer {
-    height: 24px;       /* adjust this value if you want more/less space */
+    height: 24px;
     margin-bottom: 10px;
 }
 
-/* Prompt */
+/* ===========================
+   INPUT PROMPT
+=========================== */
 #input-line {
     display: flex;
     align-items: center;
@@ -78,26 +89,41 @@ body {
     caret-color: var(--accent);
 }
 
+/* Command names (in help/socials outputs) */
 .cmd {
     color: var(--accent);
+    font-weight: 600;
 }
 
+/* ===========================
+   ASCII BANNER
+=========================== */
 .ascii {
     white-space: pre;
     font-size: 15px;
-    line-height: 1.5;
-    overflow-x: visible;
+    line-height: 1.3;
     color: var(--accent);
+    overflow-x: visible;
 
+    /* Soft glow */
     text-shadow:
-        0 0 9px #AEC6CF,
-        0 0 10px #AEC6CF;
+        0 0 5px #9bc5d3,
+        0 0 8px #9bc5d3;
 }
 
-body, #terminal {
-    user-select: none;
+#matrix-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
 }
 
+/* ===========================
+   SOCIAL LINK STYLING
+=========================== */
 .link {
     color: white;
     text-decoration: none;
