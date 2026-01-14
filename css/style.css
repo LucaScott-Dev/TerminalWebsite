@@ -42,7 +42,7 @@ body {
    TERMINAL OUTPUT LINES
 =========================== */
 .line {
-    white-space: pre;  /* keeps spacing aligned */
+    white-space: pre;  
     margin-bottom: 1px;
 }
 
@@ -58,7 +58,6 @@ body {
     color: #ff5555;
 }
 
-/* Very small controlled spacer used between boot text & prompt */
 .boot-spacer {
     height: 24px;
     margin-bottom: 10px;
